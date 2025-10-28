@@ -8,14 +8,13 @@ Each Pydantic model represents a collection in your database.
 Model name is converted to lowercase for the collection name:
 - User -> "user" collection
 - Product -> "product" collection
-- BlogPost -> "blogs" collection
+- BlogPost -> "blogpost" collection
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Literal
 
-# Example schemas (replace with your own):
-
+# Example schemas (you can keep or remove as needed)
 class User(BaseModel):
     """
     Users collection schema
@@ -38,11 +37,24 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Chatbot-related schemas
+class ChatSession(BaseModel):
+    """
+    Chat sessions created when a user starts a new conversation
+    Collection name: "chatsession"
+    """
+    title: str = Field(..., description="Session title shown in the sidebar")
+    user_id: Optional[str] = Field(None, description="Optional user id if you support auth")
+    system_prompt: Optional[str] = Field(
+        None,
+        description="Optional system prompt to steer the assistant behavior"
+    )
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Message(BaseModel):
+    """
+    Chat messages that belong to a session
+    Collection name: "message"
+    """
+    session_id: str = Field(..., description="ID of the chat session this message belongs to")
+    role: Literal["system", "user", "assistant"] = Field(..., description="Who sent the message")
+    content: str = Field(..., description="Message text content")
